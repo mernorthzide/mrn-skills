@@ -1,0 +1,14 @@
+{
+  "name": "mrn-skills",
+  "description": "MRN skills for Claude Code",
+  "owner": {
+    "name": "mernorthzide"
+  },
+  "plugins": [
+    {
+      "name": "mrn",
+      "source": "./plugins/mrn",
+      "description": "MRN skills (/mrn:*)"
+    }
+  ]
+}

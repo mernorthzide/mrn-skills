@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+.wrangler/
+next-env.d.ts
+TASK-*.md
+graphify-out/
+.impeccable/
