@@ -73,6 +73,7 @@ p { margin: 0; }
   transition: opacity 0.4s;
   white-space: nowrap;
 }
+.planet-label.is-hidden { transition-duration: 0s; } /* vanish at once off the page's words; fade back in */
 .planet-label::before { content: ""; position: absolute; left: 0; top: 1.05em; width: 18px; height: 1px; background: var(--line-2); }
 .pl-name { font-size: 0.95rem; color: var(--ink); }
 .pl-cmd { font: 0.75rem var(--font-mono); color: var(--ink-3); }

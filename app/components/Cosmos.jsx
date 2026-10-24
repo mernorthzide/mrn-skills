@@ -497,8 +497,28 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) 
 
   // Camera stages follow the page sections ([data-stage]); scroll stays native, the camera only listens.
   const stages = [...document.querySelectorAll("[data-stage]")];
-  let tops = [];
-  const measure = () => (tops = stages.map((el) => el.getBoundingClientRect().top + scrollY - innerHeight * 0.55));
+  let tops = [], words = [];
+  // Labels must not sit on the page's words: keep each text line box (not whole blocks, so empty space stays usable)
+  // and copy button, in page coordinates, and hide a label that lands on one.
+  const measureWords = () => {
+    const main = document.querySelector("main");
+    if (!main) return [];
+    const boxes = [], rng = document.createRange();
+    const add = (r) => r.width && boxes.push({ l: r.left, r: r.right, t: r.top + scrollY, b: r.bottom + scrollY });
+    const walk = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    for (let n; (n = walk.nextNode()); ) if (n.data.trim()) { rng.selectNodeContents(n); for (const r of rng.getClientRects()) add(r); }
+    for (const b of main.querySelectorAll(".copy-btn")) add(b.getBoundingClientRect());
+    return boxes;
+  };
+  const onWords = (el) => {
+    const r = el.getBoundingClientRect();
+    const m = 8, top = r.top + scrollY, bottom = r.bottom + scrollY;
+    return words.some((w) => r.left - m < w.r && w.l < r.right + m && top - m < w.b && w.t < bottom + m);
+  };
+  const measure = () => {
+    tops = stages.map((el) => el.getBoundingClientRect().top + scrollY - innerHeight * 0.55);
+    if (variant === "home") words = measureWords();
+  };
   const stageAt = () => {
     if (tops.length < 2) return 0;
     for (let i = tops.length - 2; i >= 0; i--) if (scrollY >= tops[i]) return i + Math.min(1, (scrollY - tops[i]) / (tops[i + 1] - tops[i]));
@@ -559,11 +579,16 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) 
   const t0 = performance.now();
   let last = t0, raf = 0, visible = true;
   const planetPos = (p, out) => p.mesh.getWorldPosition(out);
-  const place = (el, worldPos, dx = 0) => {
+  // Opacity is written once per frame: toggling it twice would restart the fade every frame and never finish it.
+  const place = (el, worldPos, dx = 0, hidden = false) => {
     tmp.copy(worldPos).project(camera);
-    const show = tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05;
+    let show = !hidden && tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05;
+    if (show) {
+      el.style.transform = `translate(${((tmp.x + 1) / 2) * canvas.clientWidth + dx}px, ${((1 - tmp.y) / 2) * canvas.clientHeight}px)`;
+      show = !onWords(el);
+    }
     el.style.opacity = show ? "" : "0";
-    if (show) el.style.transform = `translate(${((tmp.x + 1) / 2) * canvas.clientWidth + dx}px, ${((1 - tmp.y) / 2) * canvas.clientHeight}px)`;
+    el.classList.toggle("is-hidden", !show);
   };
 
   function frame(now) {
@@ -628,10 +653,9 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) 
     const starR = R / (camera.position.length() * Math.tan((camera.fov * Math.PI) / 360));
     for (const p of planets) {
       const wp = planetPos(p, tmp.clone());
-      place(p.label, wp, p.size * 14 + 8);
       const ndc = wp.clone().project(camera);
       const behind = wp.distanceTo(camera.position) > camera.position.length() && Math.hypot((ndc.x - starNdc.x) * camera.aspect, ndc.y - starNdc.y) < starR * 1.3;
-      if (behind) p.label.style.opacity = "0";
+      place(p.label, wp, p.size * 14 + 8, behind);
     }
     if (nextLabel) place(nextLabel, nextAnchor.getWorldPosition(tmp.clone()), 12);
     composer.render();
@@ -655,9 +679,22 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) 
   };
   const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
   io.observe(canvas);
-  // Stage tops move when the page grows or shrinks without a window resize (search filter, <details>).
-  const ro = new ResizeObserver(measure);
+  // Stage tops and word boxes move when the page changes without a window resize (search filter, <details>,
+  // new text, web fonts). Under reduced motion no loop runs, so re-place the labels here and on scroll.
+  let alive = true; // fonts.ready or a queued frame can land after cleanup
+  const remeasure = () => {
+    if (!alive) return;
+    measure();
+    if (reduce) frame(performance.now());
+  };
+  const ro = new ResizeObserver(remeasure);
   ro.observe(document.body);
+  const mo = new MutationObserver(remeasure);
+  const main = document.querySelector("main");
+  if (variant === "home" && main) mo.observe(main, { childList: true, subtree: true, characterData: true });
+  document.fonts.ready.then(remeasure);
+  const onScroll = () => requestAnimationFrame(() => alive && frame(performance.now()));
+  if (reduce && variant === "home") addEventListener("scroll", onScroll, { passive: true });
   addEventListener("resize", resize);
   addEventListener("mrn:focus", onFocus);
   addEventListener("mrn:copy", onCopy);
@@ -669,9 +706,12 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) 
   if (!reduce) raf = requestAnimationFrame(loop);
 
   return () => {
+    alive = false;
     cancelAnimationFrame(raf);
     io.disconnect();
     ro.disconnect();
+    mo.disconnect();
+    removeEventListener("scroll", onScroll);
     removeEventListener("resize", resize);
     removeEventListener("mrn:focus", onFocus);
     removeEventListener("mrn:copy", onCopy);
