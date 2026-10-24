@@ -1,5 +1,5 @@
 import { loadSkills, loadInstall, REPO_URL } from "../../lib/skills.mjs";
-import { t, href } from "../../lib/i18n.mjs";
+import { t, href, alternates } from "../../lib/i18n.mjs";
 import Cosmos from "./Cosmos.jsx";
 import CopyButton from "./CopyButton.jsx";
 import Header from "./Header.jsx";
@@ -9,7 +9,11 @@ export const staticParams = () => loadSkills().map((s) => ({ name: s.name }));
 
 export function skillMetadata(lang, name) {
   const s = loadSkills().find((x) => x.name === name);
-  return { title: `/mrn:${name} · MRN Skills`, description: (lang === "th" && s.summary) || s.summaryEn };
+  return {
+    title: `/mrn:${name} · MRN Skills`,
+    description: (lang === "th" && s.summary) || s.summaryEn,
+    alternates: alternates(lang, `/skills/${name}/`),
+  };
 }
 
 export default function SkillPage({ lang, name }) {
