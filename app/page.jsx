@@ -6,13 +6,13 @@ import { formatDate } from "../lib/format.mjs";
 import Header from "./components/Header.jsx";
 
 export default function Home() {
-  const skills = loadSkills().map(({ html, ...s }) => s);
+  const skills = loadSkills().map(({ html, files, ...s }) => s);
   const { prompt, commands } = loadInstall();
   const latest = skills.map((s) => s.updated).filter(Boolean).sort().at(-1);
 
   return (
     <>
-      <Cosmos skills={skills} />
+      <Cosmos names={skills.map((s) => s.name)} />
       <Header />
       <main>
         <section className="hero" data-stage>
@@ -47,7 +47,7 @@ export default function Home() {
                 พิมพ์ <code>/reload-plugins</code>
               </h3>
               <p>
-                แล้วเรียกใช้ได้เลย เช่น <code>{`/mrn:${skills[0]?.name ?? "prove-it"}`}</code>
+                แล้วเรียกใช้ได้เลย เช่น <code>/mrn:prove-it</code>
               </p>
             </li>
           </ol>

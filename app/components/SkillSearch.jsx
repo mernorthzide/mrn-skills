@@ -4,7 +4,7 @@ import { formatDate } from "../../lib/format.mjs";
 
 const focusPlanet = (name) => dispatchEvent(new CustomEvent("mrn:focus", { detail: name }));
 
-// Filters by name/description/summary; Thai has no case, so lower-casing is enough. "/" jumps to the search box.
+// Filters by name/description/summary, every word must match; Thai has no case, so lower-casing is enough. "/" jumps to the search box.
 export default function SkillSearch({ skills }) {
   const [q, setQ] = useState("");
   const input = useRef(null);
@@ -20,7 +20,11 @@ export default function SkillSearch({ skills }) {
   }, []);
 
   const query = q.trim().toLocaleLowerCase("th");
-  const shown = skills.filter((s) => !query || `${s.name} ${s.description} ${s.summary}`.toLocaleLowerCase("th").includes(query));
+  const words = query.split(/\s+/).filter(Boolean);
+  const shown = skills.filter((s) => {
+    const text = `${s.name} ${s.description} ${s.summary}`.toLocaleLowerCase("th");
+    return words.every((w) => text.includes(w));
+  });
 
   return (
     <div className="skills">

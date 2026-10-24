@@ -10,12 +10,24 @@ argument-hint: "[module, subsystem หรือ pain point ที่อยาก
 หา **deepening opportunity**: refactor ที่เปลี่ยน module ตื้นให้ลึก เพื่อให้ test ง่ายขึ้นและ AI อ่านโค้ดเข้าใจง่ายขึ้น
 
 **ภาษา**: คุยกับผู้ใช้และเขียน report เป็นภาษาไทย แต่ศัพท์สถาปัตยกรรมใช้คำอังกฤษตรงตัว
-- เรียก Skill tool ด้วย `mattpocock-skills:codebase-design` ก่อนเริ่ม เพื่อโหลดศัพท์ (**module**, **interface**, **implementation**, **depth**, **deep**, **shallow**, **seam**, **adapter**, **leverage**, **locality**) และหลักการ (deletion test, "the interface is the test surface", "one adapter = hypothetical seam, two = real")
+- เรียก Skill tool ด้วย `mattpocock-skills:codebase-design` ก่อนเริ่ม (ไม่มี: ดู **skill ภายนอก**) เพื่อโหลดศัพท์ (**module**, **interface**, **implementation**, **depth**, **deep**, **shallow**, **seam**, **adapter**, **leverage**, **locality**) และหลักการ (deletion test, "the interface is the test surface", "one adapter = hypothetical seam, two = real")
 - ห้ามใช้คำแทน เช่น component, service, API, boundary, layer หรือ wrapper (เมื่อหมายถึง module)
 
 **เอกสาร domain**: อ่าน `CONTEXT.md` หรือ `CONTEXT-MAP.md` ที่ root ถ้ามี (ถ้าไม่มีให้ดู `GLOSSARY.md`) และ ADR ใน `docs/adr/` ของส่วนที่จะดู ถ้าไม่มีไฟล์เหล่านี้ให้ข้ามไปเงียบๆ ชื่อของ domain concept ต้องตรงกับในเอกสารนี้
 
 **ห้ามแก้โค้ดในขั้น 1-3** งานแก้เกิดหลังผู้ใช้เลือกในขั้น 5 เท่านั้น
+
+## เครื่องมือ: ใช้ตัวที่มีจริง
+
+ใช้ตัวแรกในลำดับที่มีอยู่จริงใน session นี้ ตรวจจากรายการ tool และ skill ที่โหลดอยู่ หรือ `command -v <ชื่อ>` ก่อนใช้ ถ้า CLAUDE.md หรือกฎของผู้ใช้กำหนดเครื่องมือไว้ ให้ใช้ตามนั้นก่อนตาราง การติดตั้งเครื่องมือใหม่ต้องถามผู้ใช้ก่อน
+
+| งาน | ลำดับทางเลือก |
+|---|---|
+| **skill ภายนอก** (`codebase-design`, `grilling`, `domain-modeling`, `tdd`) | plugin `mattpocock-skills` ซึ่งควรติดตั้งไว้ (`claude plugin install mattpocock-skills@claude-plugins-official`) → ทำขั้นนั้นเองตามที่ skill นี้เขียนไว้: ใช้ศัพท์และหลักการในหัวข้อ **ภาษา**, grilling คือถามผู้ใช้ทีละคำถามพร้อมคำตอบที่แนะนำจนทุกกิ่งของ decision tree ตัดสินแล้ว, domain-modeling คือแก้เอกสาร domain และเขียน ADR ใน `docs/adr/` ตามขั้น 5, TDD คือเขียน test ที่ fail ผ่าน interface ใหม่ทีละตัวแล้วแก้จนผ่านก่อน refactor |
+| **browser** (ตรวจ HTML report) | browser skill หรือ MCP ที่ผู้ใช้กำหนด (เช่น ego-browser) → browser automation ใดๆ ที่มี (Playwright, Chrome DevTools, Claude in Chrome) → ตรวจจาก PDF อย่างเดียว |
+| **issue tracker** | `docs/agents/issue-tracker.md` ของ repo ถ้ามี → GitHub issue ของ repo ปัจจุบันด้วย `gh` → ไม่มี `gh`: เขียนเนื้อหา issue ให้ผู้ใช้เปิดเอง |
+| **กฎการทดสอบ** | กฎที่ผู้ใช้กำหนด (CLAUDE.md หรือกฎของผู้ใช้) → test เดิมต้องผ่านโดยไม่แก้ assertion, รัน test ที่เกี่ยวระหว่าง refactor และ test ทั้งชุดก่อนรายงาน |
+| **ผู้ตรวจอิสระ** | review tool ภายนอกที่ผู้ใช้ใช้อยู่ (เช่น Codex) → subagent ใหม่ผ่าน Agent tool → ถ้าไม่มีทั้งคู่ ทำรอบ review แยกโดยอ่านแค่ diff แล้วระบุในรายงานว่าไม่ใช่ผู้ตรวจอิสระ |
 
 ## 1. กำหนดขอบเขตก่อนสำรวจ (YAGNI)
 
@@ -67,7 +79,7 @@ git log --since="6 months ago" --name-only --format= | grep -v '^$' | sort | uni
 
 เขียนไฟล์ HTML ไฟล์เดียวไว้ที่ `${TMPDIR:-/tmp}/architecture-review-<repo>-<YYYYMMDD-HHMM>.html` เพื่อไม่ให้มีไฟล์ใหม่ใน repo ดู scaffold, รูปแบบ diagram และ style ได้ที่ [HTML-REPORT.md](HTML-REPORT.md)
 
-จากนั้นแปลงเป็น PDF ไว้ข้างกัน: `bash {path_to_skill}/scripts/to-pdf.sh "<html>"` (`{path_to_skill}` คือ directory ที่ SKILL.md นี้ถูกโหลดมา) script จะรอให้ Tailwind กับ Mermaid render ก่อนพิมพ์ แล้วพิมพ์ path ของ PDF ออกมา `open` PDF ให้ผู้ใช้ และบอก absolute path ของทั้ง PDF และ HTML ถ้า script fail เพราะหา Chrome ไม่เจอ ให้ส่ง HTML อย่างเดียวและบอกเหตุผล
+จากนั้นแปลงเป็น PDF ไว้ข้างกัน: `bash "{path_to_skill}/../../scripts/to-pdf.sh" "<html>"` (`{path_to_skill}` คือ directory ที่ SKILL.md นี้ถูกโหลดมา) script จะรอให้ Tailwind กับ Mermaid render ก่อนพิมพ์ แล้วพิมพ์ path ของ PDF ออกมา `open` PDF ให้ผู้ใช้ และบอก absolute path ของทั้ง PDF และ HTML ถ้า script fail เพราะหา Chrome ไม่เจอ ให้ส่ง HTML อย่างเดียวและบอกเหตุผล
 
 แต่ละ candidate เป็นการ์ดหนึ่งใบ มี:
 - ไฟล์ที่เกี่ยว และหลักฐาน `file:line`
@@ -81,15 +93,15 @@ git log --since="6 months ago" --name-only --format= | grep -v '^$' | sort | uni
 
 ถ้า candidate ขัดกับ ADR ให้ใส่เฉพาะเมื่อปัญหาหนักพอจะเปิด ADR ใหม่ และใส่ callout ว่า _"ขัดกับ ADR-0007 แต่ควรเปิดใหม่เพราะ…"_ ไม่ต้องไล่ refactor เชิงทฤษฎีทุกข้อที่ ADR ห้ามไว้
 
-ก่อนส่ง ให้เปิด HTML ใน ego-browser แล้วถ่าย screenshot ตรวจว่า mermaid ทุกอัน render ได้ (ไม่มีข้อความ "Syntax error") และภาษาไทยไม่แตก แล้วดู PDF อย่างน้อยหน้าแรกกับหน้าที่มี diagram เยอะที่สุด ว่าตัวอักษรใน diagram ยังอ่านได้และการ์ดไม่ถูกตัดกลางหน้า ถ้าพังให้แก้ HTML แล้วสร้าง PDF ใหม่
+ก่อนส่ง ให้เปิด HTML ใน **browser** แล้วถ่าย screenshot ตรวจว่า mermaid ทุกอัน render ได้ (ไม่มีข้อความ "Syntax error") และภาษาไทยไม่แตก แล้วดู PDF อย่างน้อยหน้าแรกกับหน้าที่มี diagram เยอะที่สุด ว่าตัวอักษรใน diagram ยังอ่านได้และการ์ดไม่ถูกตัดกลางหน้า ถ้าพังให้แก้ HTML แล้วสร้าง PDF ใหม่
 
 **ยังไม่ต้องเสนอ interface** เขียนไฟล์เสร็จแล้ว ให้ถามผู้ใช้ว่า "อยากสำรวจข้อไหน" แล้วหยุดรอ
 
 ## 5. Grilling loop
 
-เมื่อผู้ใช้เลือกแล้ว ให้เรียก Skill tool ด้วย `mattpocock-skills:grilling` แล้วไล่ decision tree กับผู้ใช้เป็นภาษาไทย: constraint, dependency, หน้าตาของ module ที่ลึกขึ้น, อะไรอยู่หลัง seam และ test ไหนจะยังอยู่ ถ้าต้องหาข้อเท็จจริงในโค้ด ให้หาเอง ห้ามถามผู้ใช้
+เมื่อผู้ใช้เลือกแล้ว ให้เรียก Skill tool ด้วย `mattpocock-skills:grilling` (ไม่มี: ดู **skill ภายนอก**) แล้วไล่ decision tree กับผู้ใช้เป็นภาษาไทย: constraint, dependency, หน้าตาของ module ที่ลึกขึ้น, อะไรอยู่หลัง seam และ test ไหนจะยังอยู่ ถ้าต้องหาข้อเท็จจริงในโค้ด ให้หาเอง ห้ามถามผู้ใช้
 
-ระหว่างคุย ถ้าเกิดการตัดสินใจเรื่องชื่อหรือเรื่องสำคัญ ให้เรียก Skill tool ด้วย `mattpocock-skills:domain-modeling` แล้วบันทึกทันที:
+ระหว่างคุย ถ้าเกิดการตัดสินใจเรื่องชื่อหรือเรื่องสำคัญ ให้เรียก Skill tool ด้วย `mattpocock-skills:domain-modeling` (ไม่มี: ดู **skill ภายนอก**) แล้วบันทึกทันที:
 - **ตั้งชื่อ module ใหม่ด้วย concept ที่ยังไม่อยู่ในเอกสาร domain**: เพิ่มคำนั้นลงใน `CONTEXT.md` (หรือ `GLOSSARY.md` ถ้า repo ใช้ไฟล์นั้นอยู่แล้ว) ถ้ายังไม่มีไฟล์ ให้สร้าง `CONTEXT.md`
 - **ทำให้คำที่กำกวมชัดขึ้น**: อัปเดตเอกสาร domain ทันที
 - **ผู้ใช้ปฏิเสธ candidate ด้วยเหตุผลที่สำคัญต่ออนาคต**: เสนอว่า _"บันทึกเป็น ADR ไว้ไหม รอบหน้าจะได้ไม่เสนอซ้ำ"_ ไม่ต้องเสนอถ้าเหตุผลเป็นเรื่องชั่วคราว เช่น "ตอนนี้ยังไม่คุ้ม"
@@ -100,6 +112,6 @@ git log --since="6 months ago" --name-only --format= | grep -v '^$' | sort | uni
 ## 6. ส่งต่อ
 
 เมื่อผู้ใช้ยืนยันแล้ว ให้ใช้ AskUserQuestion ถามว่าจะไปทางไหนต่อ:
-1. **เปิด GitHub issue** ด้วย `gh` ตามรูปแบบใน `~/.claude/agent-skills/issue-tracker.md` ใส่ label `ready-for-agent` เนื้อหาคือข้อสรุปจาก grilling, interface ที่ตกลงกัน และ test ที่ต้องมี
-2. **ลงมือเลย**: ใช้ `mattpocock-skills:tdd` เขียน test ผ่าน interface ใหม่ก่อน แล้ว refactor ตามกฎการทดสอบและ Codex review ใน CLAUDE.md รัน test ทั้งชุดก่อนรายงานว่าเสร็จ
+1. **เปิด issue** ตาม **issue tracker** ใส่ label `ready-for-agent` เนื้อหาคือข้อสรุปจาก grilling, interface ที่ตกลงกัน และ test ที่ต้องมี
+2. **ลงมือเลย**: ใช้ `mattpocock-skills:tdd` (ไม่มี: ดู **skill ภายนอก**) เขียน test ผ่าน interface ใหม่ก่อน แล้ว refactor ตาม **กฎการทดสอบ** และให้ **ผู้ตรวจอิสระ** review diff รัน test ทั้งชุดก่อนรายงานว่าเสร็จ
 3. **จบแค่นี้**: สรุปการตัดสินใจ และบอก path ของ report กับไฟล์ domain ที่แก้ไป

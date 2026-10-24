@@ -49,7 +49,7 @@ function rng(seed) {
 const smooth = (t) => t * t * (3 - 2 * t);
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-export default function Cosmos({ skills, variant = "home", focus = null }) {
+export default function Cosmos({ names, variant = "home", focus = null }) {
   const root = useRef(null);
   const canvas = useRef(null);
   const labels = useRef(null);
@@ -71,7 +71,7 @@ export default function Cosmos({ skills, variant = "home", focus = null }) {
         if (gone) return;
         try {
           const X = Object.assign({}, ...addons);
-          cleanup = build(THREE, X, { root: root.current, canvas: canvas.current, labels: labels.current, skills, variant, focus });
+          cleanup = build(THREE, X, { root: root.current, canvas: canvas.current, labels: labels.current, names, variant, focus });
         } catch (e) {
           console.warn("WebGL unavailable, showing the still sky instead.", e);
           off();
@@ -82,7 +82,7 @@ export default function Cosmos({ skills, variant = "home", focus = null }) {
       gone = true;
       cleanup();
     };
-  }, [skills, variant, focus]);
+  }, [names, variant, focus]);
 
   return (
     <div ref={root} className={`cosmos cosmos--${variant}`} data-gl="pending" aria-hidden="true">
@@ -92,7 +92,7 @@ export default function Cosmos({ skills, variant = "home", focus = null }) {
   );
 }
 
-function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
+function build(THREE, X, { root, canvas, labels, names, variant, focus }) {
   const mobile = matchMedia("(max-width: 720px)").matches;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
@@ -356,8 +356,8 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
   const [k0p, k0l] = K[0];
   const fwd = [k0l[0] - k0p[0], k0l[2] - k0p[2]];
   const openAngle = Math.atan2(fwd[0], -fwd[1]) * 0.55 + Math.atan2(-k0p[2], -k0p[0]) * 0.45;
-  const planets = skills.map((s, i) => {
-    const r = rng(s.name);
+  const planets = names.map((name, i) => {
+    const r = rng(name);
     const radius = 10 + i * 4.6 + r() * 1.2;
     const pivot = new THREE.Object3D();
     pivot.rotation.set((r() - 0.5) * 0.22, r() * Math.PI, (r() - 0.5) * 0.12);
@@ -410,16 +410,16 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
     orbit.geometry.setDrawRange(0, 0);
     pivot.add(orbit);
     return {
-      name: s.name, radius, size, mesh, orbit, pivot,
+      name, radius, size, mesh, orbit, pivot,
       // Open beside the star on the side away from the copy, turned partly toward the far side so the lit face shows.
       phase: openAngle + 0.4 - i * 0.68 + pivot.rotation.y,
       speed: 0.3 / Math.pow(radius, 1.5),
-      label: labelEl(`<span class="pl-name">${esc(s.name)}</span><span class="pl-cmd">/mrn:${esc(s.name)}</span>`),
+      label: labelEl(`<span class="pl-name">${esc(name)}</span><span class="pl-cmd">/mrn:${esc(name)}</span>`),
     };
   });
 
   // The next skill, still forming: a dust disk with a clump, honest about "more is coming".
-  const nextR = 10 + skills.length * 4.6 + 3.5;
+  const nextR = 10 + names.length * 4.6 + 3.5;
   const disk = new THREE.Object3D();
   disk.rotation.set(0.08, 0.4, -0.05);
   scene.add(disk);
@@ -514,9 +514,7 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
   const want = new THREE.Vector3(), wantLook = new THREE.Vector3(), tmp = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
   const pointer = { x: 0, y: 0 };
 
-  let focused = focus;
   const setFocus = (name) => {
-    focused = name;
     for (const p of planets) {
       const on = p.name === name;
       p.orbit.material.color.set(on ? 0xf2b544 : 0xece9e0);
@@ -643,7 +641,10 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
     if (visible && !document.hidden) frame(now);
   };
 
-  const onFocus = (e) => setFocus(e.detail ?? focus);
+  const onFocus = (e) => {
+    setFocus(e.detail ?? focus);
+    if (reduce) frame(performance.now()); // no loop runs under reduced motion
+  };
   const onCopy = () => {
     if (!reduce) shockAt = (performance.now() - t0) / 1000;
   };
@@ -653,6 +654,9 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
   };
   const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
   io.observe(canvas);
+  // Stage tops move when the page grows or shrinks without a window resize (search filter, <details>).
+  const ro = new ResizeObserver(measure);
+  ro.observe(document.body);
   addEventListener("resize", resize);
   addEventListener("mrn:focus", onFocus);
   addEventListener("mrn:copy", onCopy);
@@ -666,6 +670,7 @@ function build(THREE, X, { root, canvas, labels, skills, variant, focus }) {
   return () => {
     cancelAnimationFrame(raf);
     io.disconnect();
+    ro.disconnect();
     removeEventListener("resize", resize);
     removeEventListener("mrn:focus", onFocus);
     removeEventListener("mrn:copy", onCopy);

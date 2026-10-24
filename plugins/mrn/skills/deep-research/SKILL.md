@@ -127,6 +127,6 @@ Save your verification log to {absolute dir}/research_notes/{ชื่อเร�
 
 ### 8. ส่งรายงาน
 
-แปลงรายงานเป็น PDF ไว้ข้างกัน: `bash "{path_to_skill}/scripts/md-to-pdf.sh" "{absolute dir}/reports/{ชื่อเรื่อง}.md"` script จะพิมพ์ path ของ PDF ออกมา แล้ว `open` PDF ให้ผู้ใช้ ถ้า script fail (ไม่มี Chrome หรือ npx) ให้ส่งแค่ .md และบอกเหตุผล
+แปลงรายงานเป็น PDF ไว้ข้างกัน: `bash "{path_to_skill}/../../scripts/to-pdf.sh" "{absolute dir}/reports/{ชื่อเรื่อง}.md"` script จะพิมพ์ path ของ PDF ออกมา แล้ว `open` PDF ให้ผู้ใช้ ถ้า script fail (ไม่มี Chrome หรือ npx) ให้ส่งแค่ .md และบอกเหตุผล
 
 อ่านรายงานฉบับสุดท้ายกับบรรทัดสรุปใน `_citation-check.md` แล้วตอบผู้ใช้เป็นภาษาไทย 3-5 ประโยค: คำตอบหลัก, สิ่งที่ยังไม่แน่นอน, จำนวน claim ที่ตรวจแล้วกับที่แก้ไป และ absolute path ของทั้ง .md และ .pdf ถ้ามีเครื่องมือส่งไฟล์ให้ผู้ใช้ ให้ส่ง PDF ด้วย

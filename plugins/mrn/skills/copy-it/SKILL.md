@@ -1,6 +1,6 @@
 ---
 name: copy-it
-description: Clones a reference website the user sends. Researches it and reads its docs, explores every page and flow live in ego-browser (handing off to the user to log in where needed), writes a full rebuild plan, asks the user about look, stack, framework, hosting and scope, waits for confirmation, then rebuilds the site and QAs it page by page against the original. Use when the user says "copy-it", "copy this website", "clone this site", "ลอกเว็บนี้", "ก๊อปเว็บนี้", "ทำเว็บเหมือนอันนี้".
+description: Clones a reference website the user sends. Researches it and reads its docs, explores every page and flow live in a browser (handing off to the user to log in where needed), writes a full rebuild plan, asks the user about look, stack, framework, hosting and scope, waits for confirmation, then rebuilds the site and QAs it page by page against the original. Use when the user says "copy-it", "copy this website", "clone this site", "ลอกเว็บนี้", "ก๊อปเว็บนี้", "ทำเว็บเหมือนอันนี้".
 argument-hint: "<URL เว็บต้นแบบ> [หมายเหตุเพิ่มเติม]"
 ---
 
@@ -8,10 +8,20 @@ argument-hint: "<URL เว็บต้นแบบ> [หมายเหตุ�
 
 งานมี 4 ช่วง: สำรวจ → แผนและยืนยัน → ลอก → ทดสอบ **ห้ามเขียนโค้ดของเว็บใหม่ก่อนผู้ใช้ยืนยันแผนในช่วง 2**
 
+## เครื่องมือ: ใช้ตัวที่มีจริง
+
+ใช้ตัวแรกในลำดับที่มีอยู่จริงใน session นี้ ตรวจจากรายการ tool และ skill ที่โหลดอยู่ หรือ `command -v <ชื่อ>` ก่อนใช้ ถ้า CLAUDE.md หรือกฎของผู้ใช้กำหนดเครื่องมือไว้ ให้ใช้ตามนั้นก่อนตาราง การติดตั้งเครื่องมือใหม่ต้องถามผู้ใช้ก่อน
+
+| งาน | ลำดับทางเลือก |
+|---|---|
+| **browser** | browser skill หรือ MCP ที่ผู้ใช้กำหนด (เช่น ego-browser) → browser automation ใดๆ ที่มี (Playwright, Chrome DevTools, Claude in Chrome) → หยุดแล้วบอกผู้ใช้ว่างานนี้ต้องเห็นเว็บจริง พร้อมเสนอให้ติดตั้ง browser automation (เช่น Playwright MCP) |
+| **กฎ UX/UI และการทดสอบ** | กฎที่ผู้ใช้กำหนด (CLAUDE.md หรือกฎของผู้ใช้) → checklist ในช่วง 4 ของ skill นี้ |
+| **ผู้ตรวจอิสระ** | review tool ภายนอกที่ผู้ใช้ใช้อยู่ (เช่น Codex) → subagent ใหม่ผ่าน Agent tool → ถ้าไม่มีทั้งคู่ ทำรอบ review แยกโดยอ่านแค่ diff แล้วระบุในรายงานว่าไม่ใช่ผู้ตรวจอิสระ |
+
 ## กติกาตลอดงาน
 
 - **ที่เก็บงาน**: ทุกอย่างจากการสำรวจเก็บใน `copy-it/` ที่ root ของ project (`research.md`, `inventory.md`, `tokens.md`, `PLAN.md`, `screens/`) ถ้า cwd ไม่ใช่ project ให้สร้าง folder ใหม่ชื่อ `<ชื่อเว็บ>-clone/` แล้วทำงานในนั้น
-- **browser**: ใช้ ego-browser เท่านั้น โหลด skill `ego-browser` แล้วทำตามคู่มือที่ `ego-browser skill` พิมพ์ออกมา
+- **browser**: ใช้ตาม **เครื่องมือ** ข้างบน ถ้าเป็น ego-browser ให้โหลด skill `ego-browser` แล้วทำตามคู่มือที่ `ego-browser skill` พิมพ์ออกมา
 - **บัญชีจริงของผู้ใช้**: เปิดดูและกดสำรวจได้ แต่ห้ามทำสิ่งที่มีผลจริง ได้แก่ จ่ายเงิน, สั่งซื้อ, ส่งข้อความหรืออีเมล, ลบ, เชิญคน, publish และเปลี่ยน setting ถ้าต้องดู flow พวกนี้ ให้เดินไปถึงหน้าก่อนกดยืนยันแล้วหยุด หรือถามผู้ใช้ก่อน
 - **ลิขสิทธิ์และแบรนด์**: ลอกโครงสร้าง, layout, flow และพฤติกรรมได้ ส่วน logo, ชื่อแบรนด์, รูป, บทความ, font ที่มี license และ icon set เฉพาะแบรนด์ ใช้ของเดิมได้เฉพาะเมื่อผู้ใช้ยืนยันว่าเป็นเจ้าของหรือมีสิทธิ์ (ถามในข้อ 2.2) นอกนั้นใช้ placeholder ห้ามทำหน้า login หรือหน้าชำระเงินที่เลียนแบรนด์จริงจนเอาไปหลอกคนได้
 - **ขนาน**: แตก subagent ได้ตอนอ่านคู่มือ (แบ่งตาม section) และตอนลอก (แบ่งตาม module) ตัวหลักต้องอ่านและตรวจผลของทุกตัวเอง
@@ -42,7 +52,7 @@ WebSearch หา docs, help center, user guide, FAQ, changelog, pricing แล�
 6. network: endpoint ที่แต่ละหน้าเรียก และรูปแบบข้อมูลที่ได้กลับมา ใช้เดา data model
 7. design token: อ่าน computed style ของ body, heading, ปุ่ม, link, input และ card (font, size, weight, line-height, สี, spacing, radius, shadow, breakpoint) บันทึกลง `tokens.md`
 
-**ต้อง login**: เมื่อถึงหน้าที่ต้อง login ให้ `task.handOff()` ตามคู่มือ ego-browser แล้วบอกผู้ใช้ว่าต้อง login เว็บไหน จากนั้นจบรอบรอผู้ใช้ตอบ เมื่อผู้ใช้ยืนยันแล้วค่อยกลับมาสำรวจส่วนหลัง login ต่อ ถ้าเว็บมีหลาย role (เช่น admin กับ user) ให้ถามว่ามีบัญชี role อื่นให้สำรวจไหม ห้ามขอรหัสผ่านทางแชท
+**ต้อง login**: เมื่อถึงหน้าที่ต้อง login ให้ส่งให้ผู้ใช้ login เองใน browser (ego-browser: `task.handOff()` ตามคู่มือ) แล้วบอกผู้ใช้ว่าต้อง login เว็บไหน จากนั้นจบรอบรอผู้ใช้ตอบ เมื่อผู้ใช้ยืนยันแล้วค่อยกลับมาสำรวจส่วนหลัง login ต่อ ถ้าเว็บมีหลาย role (เช่น admin กับ user) ให้ถามว่ามีบัญชี role อื่นให้สำรวจไหม ห้ามขอรหัสผ่านทางแชท
 
 **หน้าที่ใช้ template เดียวกัน** (เช่น `/product/123`): ดู 2-3 หน้าที่ข้อมูลต่างกันพอ แล้วจดว่าเป็น template
 
@@ -87,8 +97,8 @@ WebSearch หา docs, help center, user guide, FAQ, changelog, pricing แล�
 2. **แตก subagent หรือ Workflow ตาม module** ที่ไม่แก้ไฟล์เดียวกัน (ถ้าชนกันให้ใช้ `isolation: "worktree"`) prompt ของแต่ละตัวต้องมี:
    - หน้าที่รับผิดชอบตาม `inventory.md`
    - path ของ screenshot ต้นฉบับ และ `tokens.md`
-   - กฎ UX/UI และกฎการทดสอบจาก CLAUDE.md
-   - คำสั่งให้เปิดงานของตัวเองเทียบกับ screenshot ต้นฉบับใน ego-browser ก่อนส่ง
+   - **กฎ UX/UI และการทดสอบ** ตาม **เครื่องมือ** (ถ้าเป็น checklist ช่วง 4 ให้ใส่ข้อความเต็ม)
+   - คำสั่งให้เปิดงานของตัวเองเทียบกับ screenshot ต้นฉบับใน **browser** ก่อนส่ง
 3. integration จริงใช้ sandbox หรือ test mode เท่านั้น
 4. ตัวหลักรวมงานแล้วตรวจทุกชิ้นเอง
 
@@ -97,9 +107,10 @@ WebSearch หา docs, help center, user guide, FAQ, changelog, pricing แล�
 - **เทียบกับต้นฉบับทีละหน้า**: เปิดต้นฉบับกับของเราที่ 1440, 768 และ 375 ถ่าย screenshot คู่กัน จดจุดที่ต่าง แล้วแก้จนตรงตามที่ตกลงไว้ (ถ้าเลือก "เหมือนต้นฉบับ" layout, spacing, font และสีต้องตรง ถ้าเลือกแบบอื่น flow และพฤติกรรมต้องตรง)
 - **เดินทุก flow ใน test plan** ตั้งแต่ต้นจนจบ และตรวจว่าข้อมูลถูกบันทึกจริง
 - **edge case**: ข้อมูลว่าง, ข้อความยาวมาก, ภาษาไทย, input ผิดรูปแบบ, กดซ้ำ, ย้อนกลับหรือ refresh กลางทาง, สิทธิ์ไม่พอ, network fail และจอ mobile
+- **UX/UI**: ทุกหน้ามี empty, loading, error และ success state, ใช้ keyboard ได้และเห็น focus, contrast ผ่าน WCAG AA และ touch target ไม่ต่ำกว่า 44px
 - ตรวจ console error, network request ที่ fail และ log ฝั่ง server
 - รัน test, typecheck และ build ทั้งชุด logic เรื่องเงิน, auth หรือ data ให้ใช้ `/mrn:prove-it`
-- review ด้วย Codex ตามกฎใน CLAUDE.md
+- review โค้ดด้วย **ผู้ตรวจอิสระ**
 - deploy เฉพาะเมื่อแผนระบุไว้ และต้องถามยืนยันก่อน deploy ครั้งแรก
 
 ## รายงาน

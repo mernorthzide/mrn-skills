@@ -7,7 +7,7 @@
     "build": "next build",
     "test": "next build && node --test",
     "preview": "next build && wrangler dev",
-    "deploy": "next build && wrangler deploy"
+    "deploy": "npm test && wrangler deploy"
   },
   "dependencies": {
     "marked": "18.1.0",

@@ -18,11 +18,10 @@ export default async function SkillPage({ params }) {
   const all = loadSkills();
   const s = all.find((x) => x.name === name);
   const { prompt } = loadInstall();
-  const tree = `${REPO_URL}/blob/main/plugins/mrn/skills/${s.name}`;
 
   return (
     <>
-      <Cosmos skills={all.map(({ html, ...x }) => x)} variant="planet" focus={s.name} />
+      <Cosmos names={all.map((x) => x.name)} variant="planet" focus={s.name} />
       <Header />
       <main className="detail">
         <nav className="crumbs" aria-label="ตำแหน่งหน้า">
@@ -56,8 +55,8 @@ export default async function SkillPage({ params }) {
               <dd>
                 <ul className="files">
                   {s.files.map((f) => (
-                    <li key={f}>
-                      <a href={`${tree}/${f}`}>{f}</a>
+                    <li key={f.path}>
+                      <a href={f.url}>{f.path}</a>
                     </li>
                   ))}
                 </ul>
@@ -75,7 +74,7 @@ export default async function SkillPage({ params }) {
                 </>
               )}
             </dl>
-            <a className="btn-ghost" href={`${REPO_URL}/tree/main/plugins/mrn/skills/${s.name}`}>ดูบน GitHub</a>
+            <a className="btn-ghost" href={s.sourceUrl}>ดูบน GitHub</a>
           </aside>
         </div>
       </main>

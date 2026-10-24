@@ -30,4 +30,10 @@ claude plugin marketplace update mrn-skills && claude plugin update mrn@mrn-skil
 3. commit แล้ว push ขึ้น `main` เครื่องที่เปิด auto-update จะได้ skill ใหม่เอง
 4. รัน `npm run deploy` เพื่ออัปเดตเว็บ
 
+ตอนพัฒนา ให้โหลด plugin จาก repo นี้โดยตรง แทนการแก้ copy ที่อื่น repo นี้เป็นต้นฉบับเดียว:
+
+```bash
+claude --plugin-dir plugins/mrn
+```
+
 อย่าใส่ `version` ใน `plugins/mrn/.claude-plugin/plugin.json` เพราะถ้าไม่มี field นี้ Claude Code จะใช้ commit SHA เป็นเวอร์ชัน ทุก push จึงนับเป็นอัปเดตใหม่ แต่ถ้าใส่ไว้แล้วลืมเปลี่ยน ผู้ใช้จะค้างอยู่ที่เวอร์ชันเดิม
