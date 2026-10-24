@@ -186,7 +186,7 @@ main, .site-footer { position: relative; z-index: 1; }
 
 section h2 { font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.25; font-weight: 300; }
 
-.install { padding: var(--s10) var(--gutter); max-width: 80rem; display: grid; gap: var(--s7); }
+.install { padding: var(--s10) var(--gutter); max-width: 80rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s7); }
 .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); counter-reset: step; }
 .steps li { counter-increment: step; padding-top: var(--s5); border-top: 1px solid var(--line-2); display: grid; gap: var(--s2); align-content: start; }
 .steps li::before { content: counter(step); font: 500 0.9rem var(--font-mono); color: var(--star); }
@@ -255,7 +255,7 @@ h3 code { font-size: 0.85em; }
 .skill-date { grid-area: date; color: var(--ink-3); font-size: 0.88rem; white-space: nowrap; }
 .skill-go { grid-area: go; color: var(--ink-3); transition: transform 0.3s var(--ease), color 0.2s; }
 .skill-row:hover .skill-go { transform: translateX(4px); color: var(--star); }
-.empty { display: grid; gap: var(--s4); justify-items: start; padding: var(--s6) var(--s5); border: 1px dashed var(--line-2); border-radius: var(--radius); background: var(--panel); color: var(--ink-2); }
+.empty { overflow-wrap: anywhere; display: grid; gap: var(--s4); justify-items: start; padding: var(--s6) var(--s5); border: 1px dashed var(--line-2); border-radius: var(--radius); background: var(--panel); color: var(--ink-2); }
 .skill-next { display: flex; gap: var(--s3); align-items: baseline; color: var(--ink-3); font-size: 0.95rem; }
 .skill-next .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--dust); translate: 0 -1px; }
 
@@ -272,6 +272,8 @@ h3 code { font-size: 0.85em; }
 .detail-head h1 { font-size: clamp(2.8rem, 7vw, 5.6rem); line-height: 1.1; font-weight: 300; }
 .invoke code { font-size: 1.05rem; padding: 0.35em 0.7em; color: var(--star-2); background: rgba(242, 181, 68, 0.1); }
 .invoke .hint { color: var(--ink-2); }
+.invoke .hint:lang(th) { font-family: var(--font-ui), sans-serif; } /* the mono font has no Thai glyphs */
+.lang-note { font-size: 0.9rem; color: var(--ink-3); }
 .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--s8); align-items: start; }
 .facts { position: sticky; top: 96px; display: grid; gap: var(--s6); }
 .facts-install { display: grid; gap: var(--s3); padding: var(--s5); border: 1px solid var(--line-2); border-radius: 16px; background: var(--panel); }
@@ -316,7 +318,8 @@ h3 code { font-size: 0.85em; }
 @media (max-width: 720px) {
   .site-header nav a:not(:last-child) { display: none; }
   .hero { align-content: end; padding-top: 46svh; padding-bottom: var(--s7); gap: var(--s5); }
-  .copy--hero, .copy--hero .copy-btn, .close .copy, .close .copy-btn { width: 100%; justify-content: center; }
+  .copy--hero, .close .copy { justify-items: stretch; }
+  .copy--hero .copy-btn, .close .copy-btn { justify-content: center; }
   .install, .catalog, .close { padding-block: var(--s9); }
   .skill-row { grid-template-columns: 1fr 24px; grid-template-areas: "name go" "cmd go" "summary summary" "date date"; gap: var(--s1) var(--s3); padding: var(--s5) var(--s3); }
   .skill-summary { margin-top: var(--s2); }

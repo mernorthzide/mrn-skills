@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "test": "next build && node --test",
-    "preview": "next build && wrangler dev",
+    "build": "next build && mv out/th/404/index.html out/th/404.html && rm -r out/th/404",
+    "test": "npm run build && node --test",
+    "preview": "npm run build && wrangler dev",
     "deploy": "npm test && wrangler deploy"
   },
   "dependencies": {

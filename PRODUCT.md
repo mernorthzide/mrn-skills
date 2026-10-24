@@ -25,7 +25,7 @@ Unlike public skill directories, everything here is curated by one owner for thi
 ## Operating Context
 
 - Skills live in the public GitHub repo `mernorthzide/mrn-skills` at `plugins/mrn/skills/<name>/SKILL.md`; the owner keeps adding skills.
-- The install prompt is `install-prompt.md` at the repo root; the site must show its exact text.
+- The install prompt is `install-prompt.md` (Thai) and `install-prompt.en.md` (English) at the repo root; each language of the site must show its exact text.
 - Users invoke a skill as `/mrn:<name>`; after install they run `/reload-plugins` or open a new session.
 - Skill content is written in Thai with English technical terms.
 
@@ -33,7 +33,7 @@ Unlike public skill directories, everything here is curated by one owner for thi
 
 - Site is generated from the skill folders, never hand-listed; a SKILL.md without `name`/`description`, or with `name` ≠ folder, must fail the build.
 - No install counts, ratings, or usage stats exist; do not show any.
-- UI language: Thai, written the way Thai products write it; technical terms stay English.
+- UI languages: English by default at `/`, Thai at `/th/` (strings in `lib/i18n.mjs`). Thai is written the way Thai products write it; technical terms stay English. Skill bodies stay Thai in both; English pages show the English frontmatter description as the summary.
 
 ## Brand Commitments
 

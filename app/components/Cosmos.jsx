@@ -2,6 +2,7 @@
 // The MRN star system: the plugin is the star, each skill a planet, the next skill a planet still forming in the dust.
 // Everything here is decoration (aria-hidden); every word and control lives in the DOM.
 import { useEffect, useRef } from "react";
+import { t } from "../../lib/i18n.mjs";
 
 const NOISE = /* glsl */ `
 vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
@@ -49,7 +50,7 @@ function rng(seed) {
 const smooth = (t) => t * t * (3 - 2 * t);
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-export default function Cosmos({ names, variant = "home", focus = null }) {
+export default function Cosmos({ names, variant = "home", focus = null, lang }) {
   const root = useRef(null);
   const canvas = useRef(null);
   const labels = useRef(null);
@@ -71,7 +72,7 @@ export default function Cosmos({ names, variant = "home", focus = null }) {
         if (gone) return;
         try {
           const X = Object.assign({}, ...addons);
-          cleanup = build(THREE, X, { root: root.current, canvas: canvas.current, labels: labels.current, names, variant, focus });
+          cleanup = build(THREE, X, { root: root.current, canvas: canvas.current, labels: labels.current, names, variant, focus, lang });
         } catch (e) {
           console.warn("WebGL unavailable, showing the still sky instead.", e);
           off();
@@ -82,7 +83,7 @@ export default function Cosmos({ names, variant = "home", focus = null }) {
       gone = true;
       cleanup();
     };
-  }, [names, variant, focus]);
+  }, [names, variant, focus, lang]);
 
   return (
     <div ref={root} className={`cosmos cosmos--${variant}`} data-gl="pending" aria-hidden="true">
@@ -92,7 +93,7 @@ export default function Cosmos({ names, variant = "home", focus = null }) {
   );
 }
 
-function build(THREE, X, { root, canvas, labels, names, variant, focus }) {
+function build(THREE, X, { root, canvas, labels, names, variant, focus, lang }) {
   const mobile = matchMedia("(max-width: 720px)").matches;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
@@ -443,7 +444,7 @@ function build(THREE, X, { root, canvas, labels, names, variant, focus }) {
   const nextAnchor = new THREE.Object3D();
   nextAnchor.position.set(nextR, 0.8, 0);
   disk.add(nextAnchor);
-  const nextLabel = variant === "home" ? labelEl(`<span class="pl-name">skill ถัดไป</span><span class="pl-cmd">กำลังก่อตัว</span>`, "is-next") : null;
+  const nextLabel = variant === "home" ? labelEl(`<span class="pl-name">${t[lang].nextName}</span><span class="pl-cmd">${t[lang].nextState}</span>`, "is-next") : null;
 
   // Arrival: the page opens mid-warp, star streaks collapse to points as the camera drops into the system.
   const uWarp = { value: reduce || variant !== "home" ? 0 : 1 };

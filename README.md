@@ -4,7 +4,7 @@ Claude Code skills ของ MRN ทุก skill อยู่ใน plugin เ�
 
 ## ติดตั้ง
 
-คัดลอกข้อความใน [`install-prompt.md`](install-prompt.md) ไปวางใน Claude Code แล้ว Claude จะติดตั้งและเปิด auto-update ให้
+คัดลอกข้อความใน [`install-prompt.md`](install-prompt.md) (ภาษาอังกฤษ: [`install-prompt.en.md`](install-prompt.en.md)) ไปวางใน Claude Code แล้ว Claude จะติดตั้งและเปิด auto-update ให้
 
 ถ้าอยากติดตั้งเองใน terminal:
 
@@ -27,7 +27,8 @@ claude plugin marketplace update mrn-skills && claude plugin update mrn@mrn-skil
 
 1. สร้าง `plugins/mrn/skills/<name>/SKILL.md` โดยใส่ frontmatter ให้ `name` ตรงกับชื่อโฟลเดอร์ และมี `description`
 2. รัน `claude plugin validate .` และ `npm test` (build เว็บ และ fail ถ้า frontmatter ไม่ครบ)
-3. commit แล้ว push ขึ้น `main` เครื่องที่เปิด auto-update จะได้ skill ใหม่เอง
+3. เว็บมีสองภาษา: อังกฤษที่ `/` (ค่าเริ่มต้น) และไทยที่ `/th/` ข้อความ UI อยู่ใน `lib/i18n.mjs` ถ้าแก้ขั้นตอนติดตั้ง ให้แก้ทั้ง `install-prompt.md` และ `install-prompt.en.md`
+4. commit แล้ว push ขึ้น `main` เครื่องที่เปิด auto-update จะได้ skill ใหม่เอง
 4. รัน `npm run deploy` เพื่ออัปเดตเว็บ
 
 ตอนพัฒนา ให้โหลด plugin จาก repo นี้โดยตรง แทนการแก้ copy ที่อื่น repo นี้เป็นต้นฉบับเดียว:
