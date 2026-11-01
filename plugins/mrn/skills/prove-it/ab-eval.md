@@ -12,10 +12,11 @@
    ```
    claude -p "<prompt>" --output-format stream-json --verbose \
      --setting-sources project,local --settings <variant>/settings.json \
-     --append-system-prompt-file <variant>/CLAUDE.md \
+     --append-system-prompt "$(cat <variant>/CLAUDE.md)" \
      --plugin-dir <plugin ที่ต้องมีทั้งสองฝั่ง> \
      --permission-mode acceptEdits --allowedTools Read Glob Grep Edit Write Agent "Bash(node:*)" ...
    ```
+   - ส่ง CLAUDE.md เป็นข้อความด้วย `--append-system-prompt "$(cat ...)"` เพราะ `--append-system-prompt-file` ไม่โหลดไฟล์และไม่ขึ้น error (พบ พ.ย. 2026) probe ในขั้น 4 ต้องให้ agent ยกหัวข้อหนึ่งจากไฟล์มาคำต่อคำ ถ้ายกไม่ได้แปลว่าไม่ได้โหลด
    - `--setting-sources project,local` ตัด `~/.claude/CLAUDE.md` และ skill ใน `~/.claude/skills` ออก ต้องใส่กลับเองผ่าน flag
    - plugin ที่โหลดผ่าน `--plugin-dir` ใช้ key `<ชื่อ>@inline` ใน `pluginConfigs` ถ้า plugin มี options (เช่น router ของผู้ใช้) ให้ copy options จาก key เดิมไปด้วย
    - plugin ใน `~/.claude/skills/<ชื่อ>` (เช่น `mrn`) ต้องใส่กลับด้วย `--plugin-dir` เช่นกัน
