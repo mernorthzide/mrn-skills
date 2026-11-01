@@ -24,13 +24,13 @@ argument-hint: "<URL เว็บต้นแบบ> [หมายเหตุ�
 - **browser**: ใช้ตาม **เครื่องมือ** ข้างบน ถ้าเป็น ego-browser ให้โหลด skill `ego-browser` แล้วทำตามคู่มือที่ `ego-browser skill` พิมพ์ออกมา
 - **บัญชีจริงของผู้ใช้**: เปิดดูและกดสำรวจได้ แต่ห้ามทำสิ่งที่มีผลจริง ได้แก่ จ่ายเงิน, สั่งซื้อ, ส่งข้อความหรืออีเมล, ลบ, เชิญคน, publish และเปลี่ยน setting ถ้าต้องดู flow พวกนี้ ให้เดินไปถึงหน้าก่อนกดยืนยันแล้วหยุด หรือถามผู้ใช้ก่อน
 - **ลิขสิทธิ์และแบรนด์**: ลอกโครงสร้าง, layout, flow และพฤติกรรมได้ ส่วน logo, ชื่อแบรนด์, รูป, บทความ, font ที่มี license และ icon set เฉพาะแบรนด์ ใช้ของเดิมได้เฉพาะเมื่อผู้ใช้ยืนยันว่าเป็นเจ้าของหรือมีสิทธิ์ (ถามในข้อ 2.2) นอกนั้นใช้ placeholder ห้ามทำหน้า login หรือหน้าชำระเงินที่เลียนแบรนด์จริงจนเอาไปหลอกคนได้
-- **ขนาน**: แตก subagent ได้ตอนอ่านคู่มือ (แบ่งตาม section) และตอนลอก (แบ่งตาม module) ตัวหลักต้องอ่านและตรวจผลของทุกตัวเอง
+- **agent**: ช่วง 1 และ 2 ตัวหลักทำเองทั้งหมด แตก subagent ได้เฉพาะช่วง 3 เมื่อมี module อิสระตั้งแต่ 3 ชิ้นที่ใหญ่จริง (หลายหน้าหรือหลายไฟล์ต่อชิ้น) และไม่เกิน 3 ตัวพร้อมกัน ตัวหลักต้องอ่านและตรวจผลของทุกตัวเอง
 
 ## ช่วง 1: สำรวจ
 
 ### 1.1 ค้นและอ่านคู่มือ
 
-WebSearch หา docs, help center, user guide, FAQ, changelog, pricing และ API docs ของเว็บนี้ แล้วอ่านทุกหน้าที่อธิบาย feature ถ้าคู่มือยาว ให้แตก subagent ตาม section
+WebSearch หา docs, help center, user guide, FAQ, changelog, pricing และ API docs ของเว็บนี้ แล้วอ่านทุกหน้าที่อธิบาย feature เอง ถ้าคู่มือยาว ให้อ่านหน้าภาพรวมและหน้าที่อธิบาย feature หลักก่อน
 
 บันทึกลง `research.md` (ทุกข้อต้องมี URL ที่มา):
 - feature ทั้งหมด, role และสิทธิ์, plan และขีดจำกัด
@@ -69,7 +69,7 @@ WebSearch หา docs, help center, user guide, FAQ, changelog, pricing แล�
 - data model, API และ auth/role ที่ต้องมี
 - design token ที่จะใช้
 - stack ที่แนะนำพร้อมเหตุผล เทียบกับ stack ของต้นฉบับ
-- ลำดับงานเป็น phase และการแบ่ง module ที่แยกให้ subagent ทำขนานได้
+- ลำดับงานเป็น phase และการแบ่ง module ที่ไม่แก้ไฟล์เดียวกัน
 - test plan: รายการหน้าและ flow ที่จะเทียบกับต้นฉบับ
 - สิ่งที่ลอกไม่ได้หรือเสี่ยง เช่น logic หลังบ้านที่มองไม่เห็น, feature AI, การชำระเงิน
 
@@ -94,7 +94,7 @@ WebSearch หา docs, help center, user guide, FAQ, changelog, pricing แล�
 ## ช่วง 3: ลอก
 
 1. **foundation ทำเองใน agent หลัก**: scaffold, design token, layout shell, component ที่ใช้ร่วมกัน, data model และ auth
-2. **แตก subagent หรือ Workflow ตาม module** ที่ไม่แก้ไฟล์เดียวกัน (ถ้าชนกันให้ใช้ `isolation: "worktree"`) prompt ของแต่ละตัวต้องมี:
+2. **module ที่เหลือ**: ตัวหลักทำเองทีละ module ถ้ามี module อิสระตั้งแต่ 3 ชิ้นที่ใหญ่จริง แตก subagent ได้ไม่เกิน 3 ตัวพร้อมกัน (model `sonnet`, ถ้าแก้ไฟล์ชนกันให้ใช้ `isolation: "worktree"`) prompt ของแต่ละตัวต้องมี:
    - หน้าที่รับผิดชอบตาม `inventory.md`
    - path ของ screenshot ต้นฉบับ และ `tokens.md`
    - **กฎ UX/UI และการทดสอบ** ตาม **เครื่องมือ** (ถ้าเป็น checklist ช่วง 4 ให้ใส่ข้อความเต็ม)
